@@ -419,6 +419,12 @@ typedef struct {
 static void VS_CC spliceInit(VSMap *in, VSMap *out, void **instanceData, VSNode *node, VSCore *core, const VSAPI *vsapi) {
     SpliceData *d = (SpliceData *) * instanceData;
     vsapi->setVideoInfo(&d->vi, 1, node);
+
+    if (vsapi->propDeleteKey(in, "clips")) {
+        int i;
+        for (i = 0; i < d->numclips; i++)
+            vsapi->propSetNode(in, "clips", d->node[i], paAppend);
+    }
 }
 
 typedef struct {
@@ -472,6 +478,40 @@ static void VS_CC spliceFree(void *instanceData, VSCore *core, const VSAPI *vsap
     free(d);
 }
 
+static int isLikelyACache(const VSNodeRef *node, const VSAPI *vsapi) {
+    // It could also check the nodes' flags: a cache will have nfNoCache, a cache's input will not.
+    const char *name = vsapi->getFilterName(node);
+    if (strlen(name) >= 6 && strncmp(name, "Cache", 5) == 0 && name[5] >= '1' && name[5] <= '9') {
+        const VSMap *map = vsapi->getInputNodes(node);
+        if (vsapi->propNumKeys(map) == 1 &&
+            vsapi->propNumElements(map, "input nodes") == 1)
+            return 1;
+    }
+    return 0;
+}
+
+static int removeCaches(SpliceData *d, const VSAPI *vsapi) {
+    int numCaches = 0;
+    int i;
+
+    for (i = 0; i < d->numclips; i++)
+        if (isLikelyACache(d->node[i], vsapi))
+            numCaches++;
+
+    if (numCaches <= 1)
+        return 0;
+
+    for (i = 0; i < d->numclips; i++)
+        if (isLikelyACache(d->node[i], vsapi)) {
+            const VSMap *map = vsapi->getInputNodes(d->node[i]);
+            VSNodeRef *inputNode = vsapi->propGetNode(map, "input nodes", 0, 0);
+            vsapi->freeNode(d->node[i]);
+            d->node[i] = inputNode;
+        }
+
+    return 1;
+}
+
 static void VS_CC spliceCreate(const VSMap *in, VSMap *out, void *userData, VSCore *core, const VSAPI *vsapi) {
     SpliceData d;
     SpliceData *data;
@@ -480,6 +520,7 @@ static void VS_CC spliceCreate(const VSMap *in, VSMap *out, void *userData, VSCo
     int i;
     int err;
     int compat = 0;
+    int nodeFlags;
 
     d.numclips = vsapi->propNumElements(in, "clips");
     mismatch = !!vsapi->propGetInt(in, "mismatch", 0, &err);
@@ -526,10 +567,15 @@ static void VS_CC spliceCreate(const VSMap *in, VSMap *out, void *userData, VSCo
         if (d.numframes[d.numclips - 1] == 0)
             d.vi.numFrames = 0;
 
+        if (removeCaches(&d, vsapi))
+            nodeFlags = 0;
+        else
+            nodeFlags = nfNoCache;
+
         data = malloc(sizeof(d));
         *data = d;
 
-        vsapi->createFilter(in, out, "Splice", spliceInit, spliceGetframe, spliceFree, fmParallel, nfNoCache, data, core);
+        vsapi->createFilter(in, out, "Splice", spliceInit, spliceGetframe, spliceFree, fmParallel, nodeFlags, data, core);
     }
 }
 
