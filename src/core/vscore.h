@@ -374,6 +374,7 @@ private:
     int apiVersion;
     bool hasVi;
     VSFilterMode filterMode;
+    VSMap inputNodes;
 
     // for keeping track of when a filter is busy in the exclusive section and with which frame
     // used for fmSerial and fmParallel (mutex only)
@@ -403,6 +404,10 @@ public:
 
     const std::string &getName() const {
         return name;
+    }
+
+    const VSMap *getInputNodes() const {
+        return &inputNodes;
     }
 
     // to get around encapsulation a bit, more elegant than making everything friends in this case

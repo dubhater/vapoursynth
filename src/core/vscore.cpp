@@ -454,6 +454,7 @@ VSFunction::VSFunction(const std::string &argString, VSPublicFunction func, void
 
 VSNode::VSNode(const VSMap *in, VSMap *out, const std::string &name, VSFilterInit init, VSFilterGetFrame getFrame, VSFilterFree free, VSFilterMode filterMode, int flags, void *instanceData, int apiVersion, VSCore *core) :
     instanceData(instanceData), name(name), init(init), filterGetFrame(getFrame), free(free), filterMode(filterMode), apiVersion(apiVersion), core(core), flags(flags), hasVi(false), serialFrame(-1) {
+    int i;
     VSMap inval(*in);
     init(&inval, out, &this->instanceData, this, core, getVSAPIInternal(apiVersion));
 
@@ -462,6 +463,18 @@ VSNode::VSNode(const VSMap *in, VSMap *out, const std::string &name, VSFilterIni
 
     if (!hasVi)
         vsFatal("Filter %s didn't set vi", name.c_str());
+
+    for (i = 0; i < vsapi.propNumKeys(&inval); i++) {
+        const char *key = vsapi.propGetKey(&inval, i);
+        if (vsapi.propGetType(&inval, key) == ptNode) {
+            int j;
+            for (j = 0; j < vsapi.propNumElements(&inval, key); j++) {
+                VSNodeRef *tmpNode = vsapi.propGetNode(&inval, key, j, 0);
+                vsapi.propSetNode(&inputNodes, "input nodes", tmpNode, paAppend);
+                vsapi.freeNode(tmpNode);
+            }
+        }
+    }
 }
 
 VSNode::~VSNode() {

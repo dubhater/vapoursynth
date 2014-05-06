@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-#define VAPOURSYNTH_API_VERSION 3
+#define VAPOURSYNTH_API_VERSION 4
 
 // Convenience for C++ users.
 #ifdef __cplusplus
@@ -301,6 +301,9 @@ typedef int64_t (VS_CC *VSSetMaxCacheSize)(int64_t bytes, VSCore *core);
 typedef void (VS_CC *VSMessageHandler)(int msgType, const char *msg, void *userData);
 typedef void (VS_CC *VSSetMessageHandler)(VSMessageHandler handler, void *userData);
 
+typedef const VSMap *(VS_CC *VSGetInputNodes)(const VSNodeRef *node);
+typedef const char *(VS_CC *VSGetFilterName)(const VSNodeRef *node);
+
 struct VSAPI {
     VSCreateCore createCore;
     VSFreeCore freeCore;
@@ -384,6 +387,9 @@ struct VSAPI {
     VSNewVideoFrame2 newVideoFrame2;
 
     VSSetMessageHandler setMessageHandler;
+
+    VSGetInputNodes getInputNodes;
+    VSGetFilterName getFilterName;
 };
 
 VS_API(const VSAPI *) getVapourSynthAPI(int version);

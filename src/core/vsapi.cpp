@@ -580,6 +580,14 @@ static void VS_CC setMessageHandler(VSMessageHandler handler, void *userData) {
     vsSetMessageHandler(handler, userData);
 }
 
+static const VSMap *VS_CC getInputNodes(const VSNodeRef *node) {
+    return node->clip->getInputNodes();
+}
+
+static const char *VS_CC getFilterName(const VSNodeRef *node) {
+    return node->clip->getName().c_str();
+}
+
 const VSAPI vsapi = {
     &createCore,
     &freeCore,
@@ -657,7 +665,10 @@ const VSAPI vsapi = {
     &getOutputIndex,
     &newVideoFrame2,
 
-    &setMessageHandler
+    &setMessageHandler,
+
+    &getInputNodes,
+    &getFilterName
 };
 
 ///////////////////////////////
@@ -677,7 +688,7 @@ const VSAPI *VS_CC getVapourSynthAPI(int version) {
     if (!f.can_run_vs) {
         vsWarning("System does not meet minimum requirements to run VapourSynth");
         return NULL;
-    } else if (version == VAPOURSYNTH_API_VERSION) {
+    } else if (version == VAPOURSYNTH_API_VERSION || version == 3) {
         return &vsapi;
     } else {
         return NULL;
