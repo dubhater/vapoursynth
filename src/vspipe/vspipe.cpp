@@ -30,7 +30,7 @@
 #include <locale>
 #include <sstream>
 #ifdef VS_TARGET_OS_WINDOWS
-#include <codecvt>
+#include "../core/utf16.h"
 #include <io.h>
 #include <fcntl.h>
 #endif
@@ -60,8 +60,7 @@ BOOL WINAPI HandlerRoutine(DWORD dwCtrlType) {
 typedef std::wstring nstring;
 #define NSTRING(x) L##x
 std::string nstringToUtf8(const nstring &s) {
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
-    return conversion.to_bytes(s);
+    return utf16_to_bytes(s);
 }
 #else
 typedef std::string nstring;

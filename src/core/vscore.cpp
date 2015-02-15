@@ -35,7 +35,7 @@
 
 #ifdef VS_TARGET_OS_WINDOWS
 #include <shlobj.h>
-#include <codecvt>
+#include "utf16.h"
 #endif
 
 // Internal filter headers
@@ -808,7 +808,6 @@ bool VSCore::loadAllPluginsInPath(const std::string &path, const std::string &fi
         return false;
 
 #ifdef VS_TARGET_OS_WINDOWS
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
     std::wstring wPath = path + L"\\" + filter;
     WIN32_FIND_DATA findData;
     HANDLE findHandle = FindFirstFile(wPath.c_str(), &findData);
@@ -816,7 +815,7 @@ bool VSCore::loadAllPluginsInPath(const std::string &path, const std::string &fi
         return false;
     do {
         try {
-            loadPlugin(conversion.to_bytes(path + L"\\" + findData.cFileName));
+            loadPlugin(utf16_to_bytes(path + L"\\" + findData.cFileName));
         } catch (VSException &) {
             // Ignore any errors
         }
@@ -1094,8 +1093,7 @@ VSPlugin::VSPlugin(VSCore *core)
 VSPlugin::VSPlugin(const std::string &relFilename, const std::string &forcedNamespace, const std::string &forcedId, VSCore *core)
     : apiMajor(0), apiMinor(0), hasConfig(false), readOnly(false), compat(false), libHandle(0), core(core), fnamespace(forcedNamespace), id(forcedId) {
 #ifdef VS_TARGET_OS_WINDOWS
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
-    std::wstring wPath = conversion.from_bytes(relFilename);
+    std::wstring wPath = utf16_from_bytes(relFilename);
     std::vector<wchar_t> fullPathBuffer(32767 + 1); // add 1 since msdn sucks at mentioning whether or not it includes the final null
     if (wPath.substr(0, 4) != L"\\\\?\\")
         wPath = L"\\\\?\\" + wPath;
@@ -1103,7 +1101,7 @@ VSPlugin::VSPlugin(const std::string &relFilename, const std::string &forcedName
     wPath = fullPathBuffer.data();
     if (wPath.substr(0, 4) == L"\\\\?\\")
         wPath = wPath.substr(4);
-    filename = conversion.to_bytes(wPath);
+    filename = utf16_to_bytes(wPath);
     for (auto &iter : filename)
         if (iter == '\\')
             iter = '/';
