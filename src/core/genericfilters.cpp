@@ -1013,8 +1013,8 @@ static void VS_CC genericCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
 
         if (op == GenericBinarize) {
-            //if (!d.vi->format)
-            //    throw std::string("Can only process clips with constant format."); // Constant bit depth, really.
+            if (!d.vi->format)
+                throw std::string("Can only process clips with constant format."); // Constant bit depth, really.
 
             d.params.th = vsapi->propGetInt(in, "threshold", 0, &err);
             if (err)
@@ -1042,8 +1042,8 @@ static void VS_CC genericCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
 
         if (op == GenericLevels) {
-            //if (!d.vi->format)
-            //    throw std::string("Can only process clips with constant format."); // Constant bit depth, really.
+            if (!d.vi->format)
+                throw std::string("Can only process clips with constant format."); // Constant bit depth, really.
 
             int max_value = (1 << d.vi->format->bitsPerSample) - 1;
 
