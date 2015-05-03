@@ -101,6 +101,8 @@ static inline FORCE_INLINE int min_max(int a, int b) {
         return std::min(a, b);
     else if (op == GenericMaximum || op == GenericInflate)
         return std::max(a, b);
+    else
+        return 42; // Silence warning.
 }
 
 
@@ -110,6 +112,8 @@ static inline FORCE_INLINE int max_min(int a, int b) {
         return std::max(a, b);
     else if (op == GenericMaximum || op == GenericInflate)
         return std::min(a, b);
+    else
+        return 42; // Silence warning.
 }
 
 
