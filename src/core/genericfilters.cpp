@@ -913,7 +913,7 @@ static void VS_CC genericCreate(const VSMap *in, VSMap *out, void *userData, VSC
         int err;
 
         if (op == GenericMinimum || op == GenericMaximum || op == GenericDeflate || op == GenericInflate) {
-            d.params.th = vsapi->propGetInt(in, "threshold", 0, &err);
+            d.params.th = int64ToIntS(vsapi->propGetInt(in, "threshold", 0, &err));
             if (err)
                 d.params.th = 65535;
 
@@ -938,9 +938,9 @@ static void VS_CC genericCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
 
         if (op == GenericPrewitt || op == GenericSobel || op == GenericTEdge || op == GenericLimiter) {
-            d.params.thresh_low = vsapi->propGetInt(in, "min", 0, &err);
+            d.params.thresh_low = int64ToIntS(vsapi->propGetInt(in, "min", 0, &err));
 
-            d.params.thresh_high = vsapi->propGetInt(in, "max", 0, &err);
+            d.params.thresh_high = int64ToIntS(vsapi->propGetInt(in, "max", 0, &err));
             if (err)
                 d.params.thresh_high = 65535;
 
@@ -953,7 +953,7 @@ static void VS_CC genericCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
 
         if (op == GenericPrewitt || op == GenericSobel || op == GenericTEdge) {
-            d.params.rshift = vsapi->propGetInt(in, "rshift", 0, &err);
+            d.params.rshift = int64ToIntS(vsapi->propGetInt(in, "rshift", 0, &err));
 
             if (d.params.rshift < 0)
                 throw std::string("rshift must not be negative.");
@@ -961,7 +961,7 @@ static void VS_CC genericCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
 
         if (op == GenericConvolution) {
-            d.params.bias = vsapi->propGetFloat(in, "bias", 0, &err);
+            d.params.bias = (float)vsapi->propGetFloat(in, "bias", 0, &err);
 
             d.params.saturate = !!vsapi->propGetInt(in, "saturate", 0, &err);
             if (err)
@@ -997,14 +997,14 @@ static void VS_CC genericCreate(const VSMap *in, VSMap *out, void *userData, VSC
                 if (matrix[i] < -1024 || matrix[i] > 1023)
                     throw std::string("The numbers in matrix must be between -1024 and 1023.");
 
-                d.params.matrix[i] = matrix[i];
+                d.params.matrix[i] = (int)matrix[i];
                 matrix_sum += matrix[i];
             }
 
             if (matrix_sum == 0)
                 matrix_sum = 1;
 
-            d.params.rdiv = vsapi->propGetFloat(in, "divisor", 0, &err);
+            d.params.rdiv = (float)vsapi->propGetFloat(in, "divisor", 0, &err);
             if (d.params.rdiv == 0.0)
                 d.params.rdiv = matrix_sum;
 
@@ -1016,15 +1016,15 @@ static void VS_CC genericCreate(const VSMap *in, VSMap *out, void *userData, VSC
             if (!d.vi->format)
                 throw std::string("Can only process clips with constant format."); // Constant bit depth, really.
 
-            d.params.th = vsapi->propGetInt(in, "threshold", 0, &err);
+            d.params.th = int64ToIntS(vsapi->propGetInt(in, "threshold", 0, &err));
             if (err)
                 d.params.th = 1 << (d.vi->format->bitsPerSample - 1);
 
             int max_value = (1 << d.vi->format->bitsPerSample) - 1;
 
-            d.params.v0 = vsapi->propGetInt(in, "v0", 0, &err);
+            d.params.v0 = int64ToIntS(vsapi->propGetInt(in, "v0", 0, &err));
 
-            d.params.v1 = vsapi->propGetInt(in, "v1", 0, &err);
+            d.params.v1 = int64ToIntS(vsapi->propGetInt(in, "v1", 0, &err));
             if (err)
                 d.params.v1 = max_value;
 
@@ -1047,19 +1047,19 @@ static void VS_CC genericCreate(const VSMap *in, VSMap *out, void *userData, VSC
 
             int max_value = (1 << d.vi->format->bitsPerSample) - 1;
 
-            d.params.min_in = vsapi->propGetInt(in, "min_in", 0, &err);
+            d.params.min_in = int64ToIntS(vsapi->propGetInt(in, "min_in", 0, &err));
             
-            d.params.max_in = vsapi->propGetInt(in, "max_in", 0, &err);
+            d.params.max_in = int64ToIntS(vsapi->propGetInt(in, "max_in", 0, &err));
             if (err)
                 d.params.max_in = max_value;
 
-            d.params.min_out = vsapi->propGetInt(in, "min_out", 0, &err);
+            d.params.min_out = int64ToIntS(vsapi->propGetInt(in, "min_out", 0, &err));
 
-            d.params.max_out = vsapi->propGetInt(in, "max_out", 0, &err);
+            d.params.max_out = int64ToIntS(vsapi->propGetInt(in, "max_out", 0, &err));
             if (err)
                 d.params.max_out = max_value;
 
-            d.params.gamma = vsapi->propGetFloat(in, "gamma", 0, &err);
+            d.params.gamma = (float)vsapi->propGetFloat(in, "gamma", 0, &err);
             if (err)
                 d.params.gamma = 1.0f;
 
