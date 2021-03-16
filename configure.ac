@@ -340,6 +340,7 @@ AC_ARG_ENABLE([ocr],            AS_HELP_STRING([--enable-ocr],          [Enable 
 AC_ARG_ENABLE([removegrain],    AS_HELP_STRING([--enable-removegrain],  [Enable the removegrain plugin. (default=yes)]))
 AC_ARG_ENABLE([vinverse],       AS_HELP_STRING([--enable-vinverse],     [Enable the vinverse plugin. (default=yes)]))
 AC_ARG_ENABLE([vivtc],          AS_HELP_STRING([--enable-vivtc],        [Enable the vivtc plugin. (default=yes)]))
+AC_ARG_ENABLE([avscompat],      AS_HELP_STRING([--enable-avscompat],    [Enable the Avisynth compatibility plugin. (default=yes)]))
 
 subtext=""
 eedi3=""
@@ -350,6 +351,7 @@ ocr=""
 removegrain=""
 vinverse=""
 vivtc=""
+avscompat=""
 
 AS_CASE(
         [$enable_plugins],
@@ -363,6 +365,7 @@ AS_CASE(
                 AS_IF([test "x$enable_removegrain"  != "xno"], [removegrain="yes"])
                 AS_IF([test "x$enable_vinverse"     != "xno"], [vinverse="yes"])
                 AS_IF([test "x$enable_vivtc"        != "xno"], [vivtc="yes"])
+                AS_IF([test "x$enable_avscompat"    != "xno"], [avscompat="yes"])
                ],
         [no], [
                 AS_IF([test "x$enable_subtext"      = "xyes"], [subtext="yes"])
@@ -374,6 +377,7 @@ AS_CASE(
                 AS_IF([test "x$enable_removegrain"  = "xyes"], [removegrain="yes"])
                 AS_IF([test "x$enable_vinverse"     = "xyes"], [vinverse="yes"])
                 AS_IF([test "x$enable_vivtc"        = "xyes"], [vivtc="yes"])
+                AS_IF([test "x$enable_avscompat"    = "xyes"], [avscompat="yes"])
               ],
         [
          AS_IF([test "x$enable_subtext"     != "xno"], [AS_IF([test "x$enable_subtext" = "xyes"], [subtext="yes"], [subtext="auto"])])
@@ -385,6 +389,7 @@ AS_CASE(
          AS_IF([test "x$enable_removegrain" != "xno"], [removegrain="yes"])
          AS_IF([test "x$enable_vinverse"    != "xno"], [vinverse="yes"])
          AS_IF([test "x$enable_vivtc"       != "xno"], [vivtc="yes"])
+         AS_IF([test "x$enable_avscompat"   != "xno"], [avscompat="yes"])
         ]
 )
 
@@ -543,6 +548,7 @@ AM_CONDITIONAL([OCR],           [test "$ocr"])
 AM_CONDITIONAL([REMOVEGRAIN],   [test "$removegrain"])
 AM_CONDITIONAL([VINVERSE],      [test "$vinverse"])
 AM_CONDITIONAL([VIVTC],         [test "$vivtc"])
+AM_CONDITIONAL([AVSCOMPAT],     [test "$avscompat"])
 
 
 AS_IF(

@@ -21,6 +21,8 @@
 #ifndef AVISYNTH_COMPAT_H
 #define AVISYNTH_COMPAT_H
 
+#define __declspec(thing)
+
 #include "avisynth.h"
 #include "VapourSynth.h"
 #include "VSHelper.h"
@@ -64,7 +66,7 @@ public:
 
     char* __stdcall SaveString(const char* s, int length = -1);
     char* __stdcall Sprintf(const char* fmt, ...) ;
-    char* __stdcall VSprintf(const char* fmt, void* val);
+    char* __stdcall VSprintf(const char* fmt, va_list val);
 
     __declspec(noreturn) void __stdcall ThrowError(const char* fmt, ...);
 

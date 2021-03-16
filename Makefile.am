@@ -255,3 +255,16 @@ libvivtc_la_SOURCES = src/filters/vivtc/vivtc.c
 libvivtc_la_LDFLAGS = $(commonpluginldflags)
 libvivtc_la_LIBTOOLFLAGS = $(commonlibtoolflags)
 endif
+
+
+
+if AVSCOMPAT
+pkglib_LTLIBRARIES += libavscompat.la
+
+libavscompat_la_SOURCES = src/avisynth/avisynth_compat.cpp \
+						  src/avisynth/interface.cpp \
+						  src/core/cpufeatures.cpp
+libavscompat_la_LDFLAGS = $(commonpluginldflags)
+libavscompat_la_LIBTOOLFLAGS = $(commonlibtoolflags)
+libavscompat_la_CPPFLAGS = -I$(srcdir)/src/avisynth -DAVISYNTH_CORE -DBUILDING_AVSCORE
+endif

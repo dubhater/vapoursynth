@@ -23,10 +23,19 @@
 #include "avisynth_compat.h"
 #include <algorithm>
 #include <cstdarg>
-#include "../common/vsutf16.h"
 
+#ifdef _WIN32
+#include "../common/vsutf16.h"
 #define NOMINMAX
 #include <Windows.h>
+#else
+#include <strings.h>
+#include <dlfcn.h>
+#define _vsnprintf vsnprintf
+#define _stricmp strcasecmp
+#define GetProcAddress dlsym
+#define FreeLibrary dlclose
+#endif
 
 extern const AVS_Linkage* const AVS_linkage;
 
@@ -199,13 +208,13 @@ char *FakeAvisynth::Sprintf(const char *fmt, ...) {
     return result;
 }
 
-char *FakeAvisynth::VSprintf(const char *fmt, void *val) {
+char *FakeAvisynth::VSprintf(const char *fmt, va_list val) {
     std::vector<char> buf;
     int size = 0, count = -1;
 
     while (count == -1) {
         buf.resize(buf.size() + 4096);
-        count = vsnprintf(buf.data(), size - 1, fmt, (va_list)val);
+        count = vsnprintf(buf.data(), size - 1, fmt, val);
     }
 
     char *i = SaveString(buf.data());
@@ -1049,9 +1058,14 @@ PVideoFrame FakeAvisynth::SubframePlanarA(PVideoFrame src, int rel_offset, int n
 
 static void VS_CC avsLoadPlugin(const VSMap *in, VSMap *out, void *userData, VSCore *core, const VSAPI *vsapi) {
     const char *rawPath = vsapi->propGetData(in, "path", 0, nullptr);
+
+#ifdef _WIN32
     std::wstring wPath = utf16_from_utf8(rawPath);
 
     HMODULE plugin = LoadLibraryW(wPath.c_str());
+#else
+    void *plugin = dlopen(rawPath, RTLD_LAZY);
+#endif
 
     typedef const char *(__stdcall *AvisynthPluginInit2Func)(IScriptEnvironment *env);
     typedef const char *(__stdcall *AvisynthPluginInit3Func)(IScriptEnvironment *env, const AVS_Linkage *const vectors);
